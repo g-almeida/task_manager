@@ -1,6 +1,12 @@
 # Real-Time RAM Monitor for Linux
 
-A Python-based utility to monitor system-wide and application-specific memory usage in real-time, with auto-restart capabilities.
+A Python-based utility to monitor system-wide and application-specific memory usage in real-time, with auto-restart capabilities and a desktop GUI.
+
+## 📚 Detailed Documentation
+For deep dives into the design and implementation, see the following:
+- [Core Implementation Plan](./docs/CORE_PLAN.md)
+- [GUI Design & Architecture](./docs/GUI_DESIGN.md)
+- [GUI Transition Plan](./docs/GUI_PLAN.md)
 
 ## Architecture & Code Structure
 
