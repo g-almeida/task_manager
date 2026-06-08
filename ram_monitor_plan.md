@@ -31,7 +31,9 @@ The implementation follows these logical steps to extract data:
 1.  **Parse /proc/meminfo**: Create a function to read `/proc/meminfo` and extract `MemTotal`, `MemAvailable`, and optionally `Buffers` and `Cached`.
 2.  **Calculate Usage**: Calculate used memory (Total - Available) and percentage.
 3.  **Real-time Loop**: Use a `while True` loop with `time.sleep(1)` to refresh the data every second.
-4.  **Display Formatting**: Use ANSI escape codes or simple print statements to clear the console and show a clean output (Total, Used, Available, Percentage).
+4.  **Application Monitoring**: Use `psutil` to track specific apps (Gemini, VSCode, Brave) and top 3 consumers.
+5.  **Auto-Restart**: Create a `watch.py` script using `watchdog` to monitor file changes and restart the application automatically.
+6.  **Display Formatting**: Use ANSI escape codes to show a sorted, real-time list of memory usage.
 
 ## Verification & Testing
 - Run the script and compare outputs with system tools like `free -m` or `top`.
