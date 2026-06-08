@@ -45,6 +45,36 @@ def get_app_memory(app_patterns):
             
     return app_stats
 
+def get_terminal_memory():
+    """Calculates memory usage for each unique terminal session."""
+    terminals = {}
+    
+    for proc in psutil.process_iter(['name', 'terminal', 'memory_info', 'ppid']):
+        try:
+            terminal = proc.info['terminal']
+            if terminal and 'pts/' in terminal:
+                if terminal not in terminals:
+                    terminals[terminal] = {'usage': 0, 'apps': []}
+                
+                terminals[terminal]['usage'] += proc.info['memory_info'].rss / (1024 * 1024)
+                
+                # Try to identify the "active" app (not the shell)
+                name = proc.info['name']
+                if name not in ['bash', 'zsh', 'sh', 'fish', 'gnome-terminal-']:
+                    terminals[terminal]['apps'].append(name)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            continue
+            
+    # Format the results
+    results = {}
+    for tty, data in terminals.items():
+        # Clean up app names to find the most relevant one
+        active_apps = [a for a in data['apps'] if a]
+        app_label = active_apps[-1] if active_apps else "Idle"
+        results[f"Terminal ({tty.split('/')[-1]}) [{app_label}]"] = data['usage']
+        
+    return results
+
 def main():
     # Define search patterns for the requested apps
     apps_to_track = {
@@ -61,6 +91,10 @@ def main():
                 break
                 
             app_info = get_app_memory(apps_to_track)
+            terminal_info = get_terminal_memory()
+            
+            # Combine all monitoring data
+            all_apps = {**app_info, **terminal_info}
                 
             # Clear screen (ANSI escape code)
             print("\033[H\033[J", end="")
@@ -71,11 +105,11 @@ def main():
             print(f"Usage:     {system_info['percent']:>8.1f}%")
             
             print("\n--- Application Usage ---")
-            print(f"{'App':<10} {'Usage':>10} {'% of Total':>12}")
-            for app, usage in app_info.items():
-                if usage > 0:
+            print(f"{'App':<30} {'Usage':>10} {'% of Total':>12}")
+            for app, usage in all_apps.items():
+                if usage > 0.1: # Show apps using more than 0.1 MB
                     app_percent = (usage / system_info['total'] * 100) if system_info['total'] > 0 else 0
-                    print(f"{app:<10} {usage:>8.1f} MB {app_percent:>11.1f}%")
+                    print(f"{app:<30} {usage:>8.1f} MB {app_percent:>11.1f}%")
             
             print("\nPress Ctrl+C to exit.")
             time.sleep(1)
