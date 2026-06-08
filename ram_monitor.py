@@ -71,9 +71,11 @@ def main():
             print(f"Usage:     {system_info['percent']:>8.1f}%")
             
             print("\n--- Application Usage ---")
+            print(f"{'App':<10} {'Usage':>10} {'% of Total':>12}")
             for app, usage in app_info.items():
                 if usage > 0:
-                    print(f"{app:<10} {usage:>8.1f} MB")
+                    app_percent = (usage / system_info['total'] * 100) if system_info['total'] > 0 else 0
+                    print(f"{app:<10} {usage:>8.1f} MB {app_percent:>11.1f}%")
             
             print("\nPress Ctrl+C to exit.")
             time.sleep(1)
