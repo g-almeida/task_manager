@@ -14,9 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-monitor = "ram_monitor:main"
-gui-monitor = "ram_monitor_gui:main"
-native-monitor = "ram_monitor_gtk:main"
+start = "main:main"
 watch = "watch:main"
 
 

@@ -19,12 +19,12 @@ class RestartHandler(FileSystemEventHandler):
         self.process = subprocess.Popen(self.command)
 
     def on_modified(self, event):
-        if event.src_path.endswith("ram_monitor_gtk.py") or event.src_path.endswith("ram_monitor.py"):
+        if event.src_path.endswith("main.py"):
             print(f"\n[Watcher] {event.src_path} changed. Restarting...")
             self.restart()
 
 def main():
-    command = [sys.executable, "ram_monitor_gtk.py"]
+    command = [sys.executable, "main.py"]
     event_handler = RestartHandler(command)
     observer = Observer()
     observer.schedule(event_handler, path=".", recursive=False)

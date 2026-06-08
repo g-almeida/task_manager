@@ -68,17 +68,12 @@ The resulting file will be located in the `dist/` directory as `ram_monitor_gui`
    poetry install
    ```
 
-2. **Standard CLI Monitor**:
+2. **Launch Application**:
    ```bash
-   poetry run monitor
+   poetry run start
    ```
 
-3. **GUI Monitor**:
-   ```bash
-   poetry run gui-monitor
-   ```
-
-4. **Development Mode (Auto-Restart CLI)**:
+3. **Development Mode (Auto-Restart)**:
    ```bash
    poetry run watch
    ```
