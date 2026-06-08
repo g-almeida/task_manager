@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, 
                              QLabel, QGroupBox, QTreeWidget, QTreeWidgetItem, QWidget, QPushButton)
-from PySide6.QtCore import QTimer, Qt, QEvent
+from PySide6.QtCore import QTimer, Qt
 from ram_monitor import MemoryDataCollector, MemoryStats, AppUsage
 
 class RAMMonitorGUI(QMainWindow):
@@ -12,8 +12,9 @@ class RAMMonitorGUI(QMainWindow):
         
         # Initial Window State
         self.is_transparent = False
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_Hover)
+        # Restore standard window flags, keep "Stay on Top" if desired, 
+        # but let's go back to basics for stability first.
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         
         # Tracked Apps
         self.tracked_apps = {
@@ -45,14 +46,8 @@ class RAMMonitorGUI(QMainWindow):
         self.btn_transparency.setToolTip("Toggle Transparency")
         self.btn_transparency.clicked.connect(self.toggle_transparency)
         
-        # Close button for frameless mode
-        self.btn_close = QPushButton("X")
-        self.btn_close.setFixedSize(30, 30)
-        self.btn_close.clicked.connect(self.close)
-        
         control_layout.addStretch()
         control_layout.addWidget(self.btn_transparency)
-        control_layout.addWidget(self.btn_close)
         main_layout.addLayout(control_layout)
 
         # System Stats Group
@@ -94,20 +89,6 @@ class RAMMonitorGUI(QMainWindow):
         else:
             self.setWindowOpacity(1.0)
             self.btn_transparency.setStyleSheet("")
-
-    def enterEvent(self, event):
-        # Show borders when mouse is on top
-        if self.windowFlags() & Qt.FramelessWindowHint:
-            self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
-            self.show()
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        # Hide borders when mouse leaves
-        if not (self.windowFlags() & Qt.FramelessWindowHint):
-            self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-            self.show()
-        super().leaveEvent(event)
 
     def update_data(self):
         system_stats = self.collector.get_system_stats()
