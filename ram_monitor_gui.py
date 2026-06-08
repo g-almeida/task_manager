@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, 
-                             QLabel, QGroupBox, QTreeWidget, QTreeWidgetItem, QWidget)
-from PySide6.QtCore import QTimer, Qt
+                             QLabel, QGroupBox, QTreeWidget, QTreeWidgetItem, QWidget, QPushButton)
+from PySide6.QtCore import QTimer, Qt, QEvent
 from ram_monitor import MemoryDataCollector, MemoryStats, AppUsage
 
 class RAMMonitorGUI(QMainWindow):
@@ -9,6 +9,11 @@ class RAMMonitorGUI(QMainWindow):
         super().__init__()
         self.setWindowTitle("Real-Time RAM Monitor (Linux)")
         self.resize(600, 500)
+        
+        # Initial Window State
+        self.is_transparent = False
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_Hover)
         
         # Tracked Apps
         self.tracked_apps = {
@@ -33,6 +38,23 @@ class RAMMonitorGUI(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         
+        # Top Bar for Controls
+        control_layout = QHBoxLayout()
+        self.btn_transparency = QPushButton("T")
+        self.btn_transparency.setFixedSize(30, 30)
+        self.btn_transparency.setToolTip("Toggle Transparency")
+        self.btn_transparency.clicked.connect(self.toggle_transparency)
+        
+        # Close button for frameless mode
+        self.btn_close = QPushButton("X")
+        self.btn_close.setFixedSize(30, 30)
+        self.btn_close.clicked.connect(self.close)
+        
+        control_layout.addStretch()
+        control_layout.addWidget(self.btn_transparency)
+        control_layout.addWidget(self.btn_close)
+        main_layout.addLayout(control_layout)
+
         # System Stats Group
         stats_group = QGroupBox("System Statistics")
         stats_layout = QHBoxLayout()
@@ -63,6 +85,29 @@ class RAMMonitorGUI(QMainWindow):
         app_group.setLayout(app_layout)
         
         main_layout.addWidget(app_group)
+
+    def toggle_transparency(self):
+        self.is_transparent = not self.is_transparent
+        if self.is_transparent:
+            self.setWindowOpacity(0.6)
+            self.btn_transparency.setStyleSheet("background-color: #55aaff; color: white;")
+        else:
+            self.setWindowOpacity(1.0)
+            self.btn_transparency.setStyleSheet("")
+
+    def enterEvent(self, event):
+        # Show borders when mouse is on top
+        if self.windowFlags() & Qt.FramelessWindowHint:
+            self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
+            self.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        # Hide borders when mouse leaves
+        if not (self.windowFlags() & Qt.FramelessWindowHint):
+            self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+            self.show()
+        super().leaveEvent(event)
 
     def update_data(self):
         system_stats = self.collector.get_system_stats()
